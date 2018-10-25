@@ -1,68 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-    <input type="file" name="" id="plik">
-    <button id="start">
-        show me
-    </button>
-    <input type="range" min="0" max="100" step="any" name="" id="kontrast">
-    <input type="range" name="" id="nasycenie">
-    <input type="range" name="" id="jasnosc">
-    <canvas id="ps" width="600" height="300">
-
-    </canvas>
-
-
-
+    <canvas id="canvas" width="300" height="600"></canvas>
+    <div> 
+        <input id="grayscalebtn" value="Grayscale" type="button">
+        <input id="invertbtn" value="Invert" type="button">
+<!--        <input id="rotatebtn" value="Rotate" type="button"> -->
+        <input id="contrastbtn" value="Contrast" type="button">
+        <input id="contrastrng" value="Contrast" type="range">
+    </div>
     <script>
+    let img = new Image();
+    img.src = './image.jpeg';
+    img.onload = function() {
+    draw(this);
+    };
 
-        //     document.querySelector('#plik')
-        //     .addEventListener('change',(e) => {
-        //         console.log(e);
-        //       });
-
-
-        let canva = document.querySelector('#ps');
-        let ctx = canva.getContext('2d');
-
-        let img = new Image();
-        img.src = './zima.jpg';
-        img.addEventListener('load', () => {
-            ctx.drawImage(img, 0, 0, canva.width, canva.height);
-        });
+    function draw(img) {
+        let canvas = document.querySelector('canvas');
+    let ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    img.style.display = 'none';
+    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imageData.data;
         
-        var range = document.querySelector('#kontrast');
-        range.addEventListener('change', doMagic);
-
-        function doMagic() {
-            // pobieranie pixeli
-            let imageData = ctx.getImageData(0, 0, canva.width, canva.height);
-            for(let i = 0; i < imageData.data.length; i+=4){
-                imageData.data[i]   = Math.min(255, imageData.data[i] + range.val());
-                imageData.data[i+1] = Math.min(255, imageData.data[i+1] + range.val());
-                imageData.data[i+2] = Math.min(255, imageData.data[i+2] + range.val());
-            };
-
-            ctx.putImageData(imageData, 0, 0);
-            console.log(imageData);
-        };
-
-        function doBlur(){
-
+    let invert = function() {
+        for (let i = 0; i < data.length; i += 4) {
+            data[i]     = 255 - data[i];
+            data[i + 1] = 255 - data[i + 1];
+            data[i + 2] = 255 - data[i + 2];
         }
+        ctx.putImageData(imageData, 0, 0);
+    };
+
+    let grayscale = function() {
+        for (let i = 0; i < data.length; i += 4) {
+            let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i]     = avg;
+            data[i + 1] = avg;
+            data[i + 2] = avg;
+        }
+        ctx.putImageData(imageData, 0, 0);
+    };
+
+    let contrast = function() {
+        for(let i = 0; i < data.length; i+=4){
+            data[i]     = Math.min(255, data[i]   + 30);
+            data[i + 1] = Math.min(255, data[i+1] + 30);
+            data[i + 2] = Math.min(255, data[i+2] + 30);
+            };
+            ctx.putImageData(imageData, 0, 0);
+        };
+    
+    let contrastRng = function() {
+    for(let i = 0; i < data.length; i+=4){
+        data[i]     = Math.min(255, data[i]   + (contrastrng.value * 0.1));
+        data[i + 1] = Math.min(255, data[i+1] + (contrastrng.value * 0.1));
+        data[i + 2] = Math.min(255, data[i+2] + (contrastrng.value * 0.1));
+        };
+        ctx.putImageData(imageData, 0, 0);
+    };    
 
 
+/**
+    let rotate = function() {
+        let imgwidth  = sourceimage.offsetWidth;
+        let imgheight = sourceimage.offsetHeight;
+        canvas.width  = imgwidth;
+        canvas.height = imgheight;
+        ctx.save();
+        ctx.translate(imgwidth / 2, imgheight / 2);
+        ctx.rotate(Math.PI / 2);
+        ctx.drawImage(img, -(imgwidth / 2), -(imgheight / 2));
+        ctx.restore();
+    }
+**/
+    let invertbtn = document.querySelector('#invertbtn');
+    invertbtn.addEventListener('click', invert);
+    let grayscalebtn = document.querySelector('#grayscalebtn');
+    grayscalebtn.addEventListener('click', grayscale);
+//    let rotatebtn = document.querySelector('#rotatebtn');
+//    grayscalebtn.addEventListener('click', rotate);
+    let contrastbtn = document.querySelector('#contrastbtn');
+    contrastbtn.addEventListener('click', contrast);
+    let contrastrng = document.querySelector('#contrastrng');
+    contrastrng.addEventListener('change', contrastRng);
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     </script>
 </body>
-
 </html>
